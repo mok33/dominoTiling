@@ -1,131 +1,242 @@
 #include <iostream>
 #include "stdlib.h"
-#include <string>
+#include "dominoTiling.hpp"
+#include <cmath>
 
-/* https://brilliant.org/problems/domino-tiling-3/
- * Started on 08/08/2017 14:50, number of solvers 17
- * 
-	How many ways are there to tile a 5 x 6 rectangle with dominoes?
-	
-	dominoes size: 1 x 2 or 2 x 1
- * 
- * 
- */ 
-int const EMPTY = -1;
-int const UP = 1;
-int const DOWN = 2;
+//grid dimensions N x M
+int N = 0;
+int M = 0;
 
-typedef struct point{
-	int x,y;
-} point;
+//dominos dimensions N_D x M_D 
+int N_D = 0;
+int M_D = 0;
 
-bool IsInGrid(int x, int y, int n, int m, int grid[][]){
-	return (x >= 0 && x < n) && (y >= 0 && y < m);
-}
+//number of dominos N_T
+int N_T = 0;
 
-bool noCollision(int x, int y, int xf, int yf, int grid[][]){
-	
-	for(i = x; i <= xf; i++){
-		for(j = y; j <= yf; j++){
-			
-			if(grid[i][j] != EMPTY){
-				
-			}
-		}
-	}
-	return true;
-}
-
-bool placeDomino(int x, int y, int n, int m, int grid[][], int spin, int id){
-	
-	bool ok = false;
-	int xf = 0;
-	int yf = 1;
-	
-	if(spin == UP){
-		xf = 1;
-		yf = 0; 
-	}
-	
-	if(IsInGrid(x + xf, y + yf, n, m, grid) && (id == EMPTY || noCollision(x, y, xf, yf, grid))){
-		ok = true;
-		
-		for(int i = x; i <= x + xf; i++){
-			for(int j = y; i <= y + yf; j++){
-				grid[i][j] = id;
-			}
-		}	
-	}
-	
-	return ok;
-}
-void removeDomino(int x, int y, int n, int m, int grid[][], int spin, point empty[]){
-	placeDomino(x, y, n, m, grid, spin, EMPTY);
-	
-	int xf = x + 1;
-	int yf = y;
-	
-	if(spin == DOWN){
-		xf = x;
-		yf = y + 1;
-	}
-	
-	
-}
-
-void empty_adjacent_slot(int x, int y, int n, int m, int grid[][], int spin){
-	for(){
-	}
-}
-
-int dominoTiling(int n, int m, int grid[][], int x, int y, gridIsFull){
-	int N = 0;
-	point empty_adjacent_slot[6];
-	int size_eas = 0;
-	
-	if(gridIsFull){
-		N = 1;
-	}
-	else{
-		
-		if(placeDomino(x, y, n, m, grid, UP, 1)){
-			
-			for(int i = 0; i < size_eas; i++){
-				N += dominoTiling(n, m, grid, empty_slot[i].x, empty_slot[i].y);	
-			}
-		}
-		removeDomino(x, y, n, m, grid, UP);
-		
-		if(placeDomino(x, y, n, m, grid, DOWN, 1)){
-			for every empty adjacent slot:
-				N += dominoTiling(n, m, grid, empty_slot[i].x, empty_slot[i].y);
-		}
-		
-		removeDomino(x, y, n, m, grid, UP);
-		
-
-	}
-	
-	return N;
-	
-}
+int** grid = NULL;
+int ID = 0;
 
 using namespace std;
 
-
-int main(){
-	int n = 5;
-	int m = 6;
+bool placeDomino(int type, int & x, int & y, int val, domino* & tiling){	
+	int condition = N_D;
+	int i = 1;
+	int x_0 = x;
+	int y_0 = y;
 	
-	int grid[n][m];
-	for(int i = 0; i < n; i++){
-		for(int j = 0; j < m; j++){
-			grid[n][m] = EMPTY;
+	bool ok;
+	
+	tiling[val].x = y;
+	tiling[val].y = x;
+	tiling[val].spin = type;
+	
+	//cout << "place @(" << y << ", " << x << ") " << type << endl;
+	
+	if(type == VERTICALE){
+		condition = M_D;
+	}
+	
+	while(x < M && y < N && grid[y][x] == EMPTY && i <= N_D * M_D){
+		grid[y][x] = val;
+	
+
+		if(i % condition == 0){
+			x = x_0;
+			y++;
+		}
+		else{
+			x++;
+		}
+		
+		i++;
+
+		
+	}
+	ok = i > N_D * M_D;
+	
+	if(ok){
+		/*
+		for(int p = 0; p < N; p++){
+			for(int m = 0; m < M; m++){
+				cout << grid[p][m] << " ";
+				if(grid[p][m] < 10){
+					cout << " " ;
+				}
+				 
+			}
+			cout << endl;
+		}
+		*/
+		
+		//cout << "before rep @(" << y << ", " << x << ") " << endl;
+
+		y = y_0;
+		if(x == M && y < N){
+			x = 0;
+			y++;
+		}
+		//place cursor in a empty slot
+		while(y < N && x < M && grid[y][x] != EMPTY){			
+			x++;
+			if(x == M && y < N){
+				x = 0;
+				y++;
+			}
+			
+			//cout << "(" << y << ", " << x << ") ";
+		}
+		//cout << "place ok @(" << y << ", " << x << ") " << endl;
+		
+	}
+	else{
+		//cout << "place error @(" << y << ", " << x << ") " << type << endl;
+	}
+	return i > N_D * M_D;
+}
+
+void removeDomino(int type, int x , int y){
+	
+	//cout << "remove @(" << y << ", " << x << ") " << type << endl;
+	int id = 0;
+	
+	if(x < M && y < N){
+		id = grid[y][x];
+	}
+	int condition = N_D;
+	int i = 1;
+	int x_0 = x;
+	
+	if(type == VERTICALE){
+		condition = M_D;
+	}
+	
+	while(x < M && y < N && grid[y][x] == id && i <= N_D * M_D){
+		grid[y][x] = EMPTY;
+		
+		if(i % condition == 0){
+			x = x_0;
+			y++;
+		}
+		else{
+			x++;
+		}
+		i++;
+	}
+	/*
+	for(int p = 0; p < N; p++){
+			for(int m = 0; m < M; m++){
+				cout << grid[p][m] << " ";
+				if(grid[p][m] < 10){
+					cout << " " ;
+				}
+				 
+			}
+			cout << endl;
+		}
+	*/
+	//cout << "remove ok" << endl;
+
+}
+
+
+int dominoTiling_r(int i, int & x, int & y, domino* & tiling, int occupied){
+	int T = 0;
+
+	if(ID < 0 && tiling != NULL){
+		return 0;
+	}
+	if(occupied == N * M){
+		
+		ID--;
+		T = 1;
+		
+		if(ID == 0){
+			/*
+			for(int h = 0; h < (N*M)/(N_D*M_D); h++){
+				cout << "(" << tiling[h].x << ", " << tiling[h].y << ")" << tiling[h].spin << " ";
+			}
+			cout << endl;
+
+			for(int p = 0; p < N; p++){
+				for(int m = 0; m < M; m++){
+					cout << grid[p][m] << " ";
+					if(grid[p][m] < 10){
+						cout << " " ;
+					}		 
+				}
+				cout << endl;
+			}
+			*/
+			ID--;
+		}
+	}
+	else{
+		int x_0 = x;
+		int y_0 = y;
+		int spin = VERTICALE;
+		
+		if(placeDomino(spin, x, y, i, tiling)){
+			T += dominoTiling_r(i+1, x, y, tiling, occupied + N_D * M_D);
+			
+		}
+		removeDomino(spin, x_0, y_0);
+		if(ID > 0){
+			x = x_0;
+			y = y_0;
+			
+			spin = HORIZONTALE;
+			
+			if(placeDomino(spin, x, y, i, tiling)){
+				T += dominoTiling_r(i+1, x, y, tiling, occupied + N_D * M_D);
+			}
+			removeDomino(spin, x_0, y_0);	
+		}
+		
+	}
+	
+	return T;
+
+}
+
+int dominoTiling(int n, int m, int d_n, int d_m, int id_tex, domino* & tiling){
+	N = n;
+	M = m;
+	
+	N_D = d_n;
+	M_D = d_m;
+	
+	N_T = (n * m);
+	grid = new int*[N];
+	
+	ID = id_tex;
+	
+	tiling = new domino[(n*m)/(d_n*d_m)];
+	 
+	for(int i = 0; i < N; i++){
+		grid[i] = new int[M];
+		for(int j = 0; j < M; j++){
+			grid[i][j] = EMPTY;
 		}
 	}
 	
-	cout << dominoTiling(n, m, grid, 0, 0, false) << endl;
+	int x = 0;
+	int y = 0;
 
+	int cpt = dominoTiling_r(0, x, y, tiling, 0);
 
+	for(int i = 0; i < N; i++){
+		delete[] grid[i];
+	}
+	
+	delete[] grid;
+	cout << "Computing OK" << endl;
+	return cpt;
+}
+/*
+int main(){
+	domino* t = NULL;
+	cout << dominoTiling(6, 7, 1, 2, 11000, t) << endl;
 	return 0;
 }
+*/
