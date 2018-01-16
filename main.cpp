@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <time.h>
 
 using namespace std;
 
@@ -61,6 +62,13 @@ void drawDominos(ImagePNG& image, domino d){
 }
 
 int main(int argc, char* argv[]){
+	if(argc < 6){
+		cout << "missing args." << endl;
+		return 0;
+		
+	}
+	
+	srand(time(NULL));
 	domino* tiling = NULL;
 
 	int id = atoi(argv[3]);
@@ -76,7 +84,7 @@ int main(int argc, char* argv[]){
 	int n = atoi(argv[2]) * n_d;
 	int m = atoi(argv[1]) * m_d;
 	
-	int nb_tiles = ceil((n * m)/(n_d * m_d));
+	int nb_tiles = atoi(argv[2]) * atoi(argv[1]);
 
 	for(int x = 0; x < domino_H.largeur(); x++){
 		for(int y = 0; y < domino_H.hauteur(); y++){
@@ -84,16 +92,15 @@ int main(int argc, char* argv[]){
 		}
 	}
 	
+	dominoTiling(m, n, n_d, m_d, id, tiling);
 
-	cout << dominoTiling(m, n, n_d, m_d, id, tiling) << endl;
-	
 	ImagePNG image(m, n);
 	for(int k = 0; k < nb_tiles; k++)
 	{
+		cout << tiling[k].spin << " ";
 		drawDominos(image, tiling[k]);
 	}
-	cout << "finished" << endl;
-	image.sauver("output2.png");
+	image.sauver(argv[5]);
 	
 	exit(EXIT_SUCCESS);
 	

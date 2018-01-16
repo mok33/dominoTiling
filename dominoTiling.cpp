@@ -230,7 +230,6 @@ int dominoTiling(int n, int m, int d_n, int d_m, int id_tex, domino* & tiling){
 	}
 	
 	delete[] grid;
-	cout << "Computing OK" << endl;
 	return cpt;
 }
 /*
